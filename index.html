@@ -4,202 +4,258 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Dassault - Mini Dashboard</title>
-  <link href="dist/output.css" rel="stylesheet" />
+
   <style>
-    /* Effet flash vert lors de la complétion */
-    .animate-complete {
-      background-color: rgba(34, 197, 94, 0.2);
-      transition: background-color 0.6s ease;
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #f5f5f5;
+      color: #1a202c;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    body.dark {
+      background-color: #1a202c;
+      color: #e2e8f0;
     }
 
-    /* Effet flash jaune lors de la décomplétion */
-    .animate-uncomplete {
-      background-color: rgba(253, 224, 71, 0.2);
-      transition: background-color 0.6s ease;
+    .card {
+      background-color: #fff;
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      width: 100%;
+      max-width: 28rem;
+      border-top: 0.25rem solid #003057;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      transition: background-color 0.3s;
+    }
+    body.dark .card {
+      background-color: #2d3748;
     }
 
-    /* Animation de suppression */
-    .fade-out {
-      opacity: 0;
-      transform: translateX(-20px);
-      transition: opacity 0.3s ease, transform 0.3s ease;
+    input {
+      border: 1px solid #ccc;
+      border-radius: 0.25rem;
+      padding: 0.5rem 1rem;
+      flex-grow: 1;
+    }
+    body.dark input {
+      background-color: #4a5568;
+      color: #e2e8f0;
+      border-color: #718096;
     }
 
-    /* Effet de surbrillance pour le bouton de filtre actif */
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem;
+      margin-bottom: 0.5rem;
+      border-radius: 0.25rem;
+      background-color: #f5f5f5;
+    }
+    body.dark li {
+      background-color: #4a5568;
+    }
+    li:hover {
+      background-color: #e2e8f0;
+    }
+    body.dark li:hover {
+      background-color: #718096;
+    }
+
     .filter-selected {
       border-color: #003057;
-      box-shadow: 0 0 10px rgba(0, 48, 87, 0.5);
-      transition: box-shadow 0.3s, transform 0.2s;
-      transform: scale(1.05);
+      background-color: #003057;
+      color: white;
+    }
+
+    .dashboard-title {
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 1.5rem;
+      color: #003057;
+    }
+    body.dark .dashboard-title {
+      color: #ffffff;
+    }
+
+    #emptyTrashBtn {
+      background-color: #e63946;
+      color: white;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 0.25rem;
+      cursor: pointer;
+    }
+    #emptyTrashBtn:hover {
+      background-color: #d62828;
+    }
+
+    @media (max-width: 480px) {
+      .card {
+        padding: 1rem;
+      }
+      .dashboard-title {
+        font-size: 1.25rem;
+      }
     }
   </style>
 </head>
-<body class="bg-gray-200 min-h-screen flex items-center justify-center font-sans transition-colors duration-300">
-  <div class="bg-white dark:bg-gray-800 shadow-xl rounded-lg p-6 w-full max-w-lg border-t-4 border-[#003057] transition-colors duration-300">
-    
-    <!-- Dark mode toggle -->
-    <div class="flex justify-center mb-4">
-      <button id="darkModeToggle" aria-label="Basculer mode sombre" class="px-3 py-1 border rounded text-sm border-[#003057] text-[#003057] dark:text-white dark:border-gray-200 transition-colors duration-300">
-        Mode Sombre
-      </button>
+<body>
+
+  <div class="card">
+    <div style="display:flex; justify-content:center; margin-bottom:1rem;">
+      <button id="darkModeToggle" style="padding:0.25rem 0.75rem; border:1px solid #003057; color:#003057; border-radius:0.25rem;">Mode Sombre</button>
     </div>
 
-    <!-- Logo -->
-    <div class="flex justify-center mb-4">
-      <img src="images/dassault-aviation-logo-800.jpg" alt="Dassault Logo" class="h-12" />
+    <div style="display:flex; justify-content:center; margin-bottom:1rem;">
+      <img src="dassault-aviation-logo-800.png" alt="Dassault Logo" style="height:3rem;" />
     </div>
 
-    <!-- Titre -->
-    <h1 class="text-2xl font-bold mb-6 text-center text-[#003057] dark:text-white">
-      Gestion des Tâches
-    </h1>
+    <h1 class="dashboard-title">Gestion des Tâches</h1>
 
-    <!-- Input et ajout -->
-    <div class="flex mb-4">
-      <input
-        id="taskInput"
-        type="text"
-        placeholder="Nouvelle tâche..."
-        class="border border-gray-300 rounded-l px-4 py-2 w-full focus:outline-none dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 transition-colors duration-300"
-        aria-label="Saisir une nouvelle tâche"
-      />
-      <button
-        id="addTaskBtn"
-        class="px-4 rounded-r text-white font-medium bg-[#003057] hover:bg-[#002244] dark:bg-gray-600 dark:hover:bg-gray-500 transition-colors duration-300"
-      >
-        Ajouter
-      </button>
+    <div style="display:flex; margin-bottom:1rem;">
+      <input id="taskInput" type="text" placeholder="Nouvelle tâche..." aria-label="Saisir une nouvelle tâche" />
+      <button id="addTaskBtn" style="margin-left:0.25rem; background-color:#003057; color:white; padding:0.5rem 1rem; border-radius:0.25rem;">Ajouter</button>
     </div>
 
-    <!-- Filtres -->
-    <div class="flex justify-center mb-4 space-x-2">
-      <button data-filter="all" class="filterBtn px-3 py-1 rounded border border-[#003057] text-[#003057] dark:border-gray-200 dark:text-white text-sm">Toutes</button>
-      <button data-filter="active" class="filterBtn px-3 py-1 rounded border border-[#003057] text-[#003057] dark:border-gray-200 dark:text-white text-sm">Actives</button>
-      <button data-filter="completed" class="filterBtn px-3 py-1 rounded border border-[#003057] text-[#003057] dark:border-gray-200 dark:text-white text-sm">Terminées</button>
-      <button data-filter="deleted" class="filterBtn px-3 py-1 rounded border border-[#003057] text-[#003057] dark:border-gray-200 dark:text-white text-sm">Corbeille</button>
-    <div>
+    <div class="filter-container" style="display:flex; justify-content:center; gap:0.5rem; margin-bottom:1rem;">
+      <button data-filter="all" class="filterBtn">Toutes</button>
+      <button data-filter="active" class="filterBtn">Actives</button>
+      <button data-filter="completed" class="filterBtn">Terminées</button>
+      <button data-filter="trash" class="filterBtn">Corbeille</button>
+    </div>
 
-    <!-- Liste des tâches -->
-    <ul id="taskList" class="space-y-2 text-gray-800 dark:text-gray-200" role="list"></ul>
+    <div id="trashActions" style="display:none; justify-content:center; margin-bottom:1rem;">
+      <button id="emptyTrashBtn">Vider la Corbeille</button>
+    </div>
+
+    <ul id="taskList" role="list"></ul>
   </div>
 
   <script>
     const darkToggle = document.getElementById('darkModeToggle');
     const body = document.body;
-
-    // Restaure préférence mode sombre
-    if (localStorage.getItem('darkMode') === 'true') {
-      body.classList.add('dark');
-      darkToggle.textContent = 'Mode Clair';
-    }
-
-    darkToggle.addEventListener('click', () => {
-      body.classList.toggle('dark');
-      const isDark = body.classList.contains('dark');
-      localStorage.setItem('darkMode', isDark);
-      darkToggle.textContent = isDark ? 'Mode Clair' : 'Mode Sombre';
-    });
-
-    // Gestion des tâches
     const taskInput = document.getElementById("taskInput");
     const addTaskBtn = document.getElementById("addTaskBtn");
     const taskList = document.getElementById("taskList");
     const filterBtns = document.querySelectorAll('.filterBtn');
+    const trashActions = document.getElementById('trashActions');
+    const emptyTrashBtn = document.getElementById('emptyTrashBtn');
 
     let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+    let trash = JSON.parse(localStorage.getItem("trash")) || [];
     let currentFilter = 'all';
 
-    const saveTasks = () => localStorage.setItem("tasks", JSON.stringify(tasks));
+    if(localStorage.getItem('darkMode')==='true'){
+      body.classList.add('dark');
+      darkToggle.textContent='Mode Clair';
+    } else {
+      darkToggle.textContent='Mode Sombre';
+    }
 
-    function renderTasks() {
-      taskList.innerHTML = "";
-      tasks.forEach((task, index) => {
-        if (currentFilter === 'active' && task.completed) return;
-        if (currentFilter === 'completed' && !task.completed) return;
+    darkToggle.addEventListener('click',()=>{
+      body.classList.toggle('dark');
+      const isDark=body.classList.contains('dark');
+      localStorage.setItem('darkMode',isDark);
+      darkToggle.textContent=isDark?'Mode Clair':'Mode Sombre';
+    });
 
-        const li = document.createElement("li");
-        li.className =
-          "flex justify-between items-center bg-gray-100 dark:bg-gray-700 p-2 rounded transition-all duration-200 hover:bg-gray-200 dark:hover:bg-gray-600";
+    function saveTasks() {
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+      localStorage.setItem('trash', JSON.stringify(trash));
+    }
 
-        li.innerHTML = `
-          <label class="flex items-center space-x-2 cursor-pointer select-none w-full">
-            <input type="checkbox" ${task.completed ? "checked" : ""} data-index="${index}"
-              class="transition-transform duration-150 active:scale-90" />
-            <span class="task-text transition-all duration-500 ease-in-out ${
-              task.completed
-                ? "line-through text-gray-400 dark:text-gray-300"
-                : ""
-            }">${task.text}</span>
-          </label>
-          <button data-index="${index}"
-            class="text-red-500 hover:text-red-700 transition-all duration-150 active:scale-90 active:opacity-70"
-            title="Supprimer">🗑️</button>
-        `;
+    function renderTasks(){
+      taskList.innerHTML='';
+      let listToShow=[];
+      if(currentFilter==='all') listToShow=tasks;
+      else if(currentFilter==='active') listToShow=tasks.filter(t=>!t.completed);
+      else if(currentFilter==='completed') listToShow=tasks.filter(t=>t.completed);
+      else if(currentFilter==='trash') listToShow=trash;
+
+      listToShow.forEach((task,index)=>{
+        const li=document.createElement('li');
+        const span=document.createElement('span');
+        span.textContent=task.text;
+        li.appendChild(span);
+
+        const btn=document.createElement('button');
+        btn.textContent=(currentFilter==='trash')?'↩':'✕';
+        btn.style.color=(currentFilter==='trash')?'green':'red';
+        btn.addEventListener('click',()=>{
+          if(currentFilter==='trash'){
+            tasks.push(task);
+            trash.splice(index,1);
+          } else {
+            trash.push(task);
+            tasks.splice(index,1);
+          }
+          saveTasks(); renderTasks();
+        });
+        li.appendChild(btn);
+
+        if(currentFilter!=='trash'){
+          const checkbox=document.createElement('input');
+          checkbox.type='checkbox';
+          checkbox.checked=task.completed||false;
+          checkbox.style.marginRight='0.5rem';
+          checkbox.addEventListener('change',()=>{
+            task.completed=checkbox.checked;
+            saveTasks();
+            renderTasks();
+          });
+          li.prepend(checkbox);
+        }
 
         taskList.appendChild(li);
       });
     }
 
-    addTaskBtn.addEventListener("click", () => {
-      if (taskInput.value.trim() === "") return;
-      tasks.push({ text: taskInput.value.trim(), completed: false });
-      taskInput.value = "";
-      saveTasks();
-      renderTasks();
+    addTaskBtn.addEventListener('click',()=>{
+      const t=taskInput.value.trim();
+      if(t!==''){
+        tasks.push({text:t,completed:false});
+        saveTasks();
+        taskInput.value='';
+        renderTasks();
+      }
+    });
+    taskInput.addEventListener('keydown',(e)=>{ if(e.key==='Enter') addTaskBtn.click(); });
+
+    filterBtns.forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        currentFilter=btn.dataset.filter;
+        filterBtns.forEach(b=>b.classList.remove('filter-selected'));
+        btn.classList.add('filter-selected');
+        trashActions.style.display = (currentFilter === 'trash') ? 'flex' : 'none';
+        renderTasks();
+      });
     });
 
-    taskList.addEventListener("change", (e) => {
-      if (e.target.type === "checkbox") {
-        const idx = e.target.dataset.index;
-        const textEl = e.target.closest("label").querySelector(".task-text");
-
-        tasks[idx].completed = e.target.checked;
-
-        if (e.target.checked) {
-          textEl.classList.add("animate-complete");
-          setTimeout(() => textEl.classList.remove("animate-complete"), 600);
-        } else {
-          textEl.classList.add("animate-uncomplete");
-          setTimeout(() => textEl.classList.remove("animate-uncomplete"), 600);
-        }
-
+    emptyTrashBtn.addEventListener('click',()=>{
+      if(confirm("Voulez-vous vraiment vider la corbeille ? Cette action est irréversible.")){
+        trash = [];
         saveTasks();
         renderTasks();
       }
     });
 
-    taskList.addEventListener("click", (e) => {
-      if (e.target.tagName === "BUTTON") {
-        const idx = e.target.dataset.index;
-        const li = e.target.closest("li");
-        li.classList.add("fade-out");
-        setTimeout(() => {
-          tasks.splice(idx, 1);
-          saveTasks();
-          renderTasks();
-        }, 300);
-      }
+    window.addEventListener('DOMContentLoaded',()=>{
+      renderTasks();
+      document.querySelector('[data-filter="all"]').classList.add('filter-selected');
     });
-
-    // Gestion des filtres avec surbrillance
-    filterBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        currentFilter = btn.dataset.filter;
-
-        // Retire l'effet de tous les boutons
-        filterBtns.forEach(b => b.classList.remove('filter-selected'));
-
-        // Ajoute l'effet au bouton cliqué
-        btn.classList.add('filter-selected');
-
-        renderTasks();
-      });
-    });
-
-    renderTasks();
-
-    // Sélectionne par défaut le filtre "Toutes"
-    document.querySelector('[data-filter="all"]').classList.add('filter-selected');
   </script>
+
 </body>
 </html>
