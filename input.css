@@ -1,0 +1,29 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Police */
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #a6a6a6; /* Gris clair pour le mode clair */
+  color: #1a202c; /* Texte sombre en mode clair */
+}
+
+/* Mode sombre global */
+body.dark {
+  background-color: #1a202c; /* Fond sombre */
+  color: #e2e8f0; /* Texte clair */
+}
+
+/* Fond blanc devient gris foncé en dark mode */
+body.dark .bg-white {
+  background-color: #2d3748;
+}
+
+/* Inputs et boutons en dark mode */
+body.dark input,
+body.dark button {
+  background-color: #4a5568;
+  color: #e2e8f0;
+  border-color: #718096;
+}

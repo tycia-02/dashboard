@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dassault - Mini Dashboard</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #f5f5f5;
+      color: #1a202c;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    body.dark {
+      background-color: #1a202c;
+      color: #e2e8f0;
+    }
+
+    .card {
+      background-color: #fff;
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      width: 100%;
+      max-width: 28rem;
+      border-top: 0.25rem solid #003057;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      transition: background-color 0.3s;
+    }
+    body.dark .card {
+      background-color: #2d3748;
+    }
+
+    input {
+      border: 1px solid #ccc;
+      border-radius: 0.25rem;
+      padding: 0.5rem 1rem;
+      flex-grow: 1;
+    }
+    body.dark input {
+      background-color: #4a5568;
+      color: #e2e8f0;
+      border-color: #718096;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem;
+      margin-bottom: 0.5rem;
+      border-radius: 0.25rem;
+      background-color: #f5f5f5;
+    }
+    body.dark li {
+      background-color: #4a5568;
+    }
+    li:hover {
+      background-color: #e2e8f0;
+    }
+    body.dark li:hover {
+      background-color: #718096;
+    }
+
+    .filter-selected {
+      border-color: #003057;
+      background-color: #003057;
+      color: white;
+    }
+
+    .dashboard-title {
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 1.5rem;
+      color: #003057;
+    }
+    body.dark .dashboard-title {
+      color: #ffffff;
+    }
+
+    #emptyTrashBtn {
+      background-color: #e63946;
+      color: white;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 0.25rem;
+      cursor: pointer;
+    }
+    #emptyTrashBtn:hover {
+      background-color: #d62828;
+    }
+
+    @media (max-width: 480px) {
+      .card {
+        padding: 1rem;
+      }
+      .dashboard-title {
+        font-size: 1.25rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <div style="display:flex; justify-content:center; margin-bottom:1rem;">
+      <button id="darkModeToggle" style="padding:0.25rem 0.75rem; border:1px solid #003057; color:#003057; border-radius:0.25rem;">Mode Sombre</button>
+    </div>
+
+    <div style="display:flex; justify-content:center; margin-bottom:1rem;">
+      <img src="https://github.com/tycia-02/dashboard/blob/main/dassault-aviation-logo-800.png?raw=true" alt="Dassault Logo" style="height:3rem;" />
+    </div>
+
+    <h1 class="dashboard-title">Gestion des Tâches</h1>
+
+    <div style="display:flex; margin-bottom:1rem;">
+      <input id="taskInput" type="text" placeholder="Nouvelle tâche..." aria-label="Saisir une nouvelle tâche" />
+      <button id="addTaskBtn" style="margin-left:0.25rem; background-color:#003057; color:white; padding:0.5rem 1rem; border-radius:0.25rem;">Ajouter</button>
+    </div>
+
+    <div class="filter-container" style="display:flex; justify-content:center; gap:0.5rem; margin-bottom:1rem;">
+      <button data-filter="all" class="filterBtn">Toutes</button>
+      <button data-filter="active" class="filterBtn">Actives</button>
+      <button data-filter="completed" class="filterBtn">Terminées</button>
+      <button data-filter="trash" class="filterBtn">Corbeille</button>
+    </div>
+
+    <div id="trashActions" style="display:none; justify-content:center; margin-bottom:1rem;">
+      <button id="emptyTrashBtn">Vider la Corbeille</button>
+    </div>
+
+    <ul id="taskList" role="list"></ul>
+  </div>
+
+  <script>
+    const darkToggle = document.getElementById('darkModeToggle');
+    const body = document.body;
+    const taskInput = document.getElementById("taskInput");
+    const addTaskBtn = document.getElementById("addTaskBtn");
+    const taskList = document.getElementById("taskList");
+    const filterBtns = document.querySelectorAll('.filterBtn');
+    const trashActions = document.getElementById('trashActions');
+    const emptyTrashBtn = document.getElementById('emptyTrashBtn');
+
+    let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+    let trash = JSON.parse(localStorage.getItem("trash")) || [];
+    let currentFilter = 'all';
+
+    if(localStorage.getItem('darkMode')==='true'){
+      body.classList.add('dark');
+      darkToggle.textContent='Mode Clair';
+    } else {
+      darkToggle.textContent='Mode Sombre';
+    }
+
+    darkToggle.addEventListener('click',()=>{
+      body.classList.toggle('dark');
+      const isDark=body.classList.contains('dark');
+      localStorage.setItem('darkMode',isDark);
+      darkToggle.textContent=isDark?'Mode Clair':'Mode Sombre';
+    });
+
+    function saveTasks() {
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+      localStorage.setItem('trash', JSON.stringify(trash));
+    }
+
+    function renderTasks(){
+      taskList.innerHTML='';
+      let listToShow=[];
+      if(currentFilter==='all') listToShow=tasks;
+      else if(currentFilter==='active') listToShow=tasks.filter(t=>!t.completed);
+      else if(currentFilter==='completed') listToShow=tasks.filter(t=>t.completed);
+      else if(currentFilter==='trash') listToShow=trash;
+
+      listToShow.forEach((task,index)=>{
+        const li=document.createElement('li');
+        const span=document.createElement('span');
+        span.textContent=task.text;
+        li.appendChild(span);
+
+        const btn=document.createElement('button');
+        btn.textContent=(currentFilter==='trash')?'↩':'✕';
+        btn.style.color=(currentFilter==='trash')?'green':'red';
+        btn.addEventListener('click',()=>{
+          if(currentFilter==='trash'){
+            tasks.push(task);
+            trash.splice(index,1);
+          } else {
+            trash.push(task);
+            tasks.splice(index,1);
+          }
+          saveTasks(); renderTasks();
+        });
+        li.appendChild(btn);
+
+        if(currentFilter!=='trash'){
+          const checkbox=document.createElement('input');
+          checkbox.type='checkbox';
+          checkbox.checked=task.completed||false;
+          checkbox.style.marginRight='0.5rem';
+          checkbox.addEventListener('change',()=>{
+            task.completed=checkbox.checked;
+            saveTasks();
+            renderTasks();
+          });
+          li.prepend(checkbox);
+        }
+
+        taskList.appendChild(li);
+      });
+    }
+
+    addTaskBtn.addEventListener('click',()=>{
+      const t=taskInput.value.trim();
+      if(t!==''){
+        tasks.push({text:t,completed:false});
+        saveTasks();
+        taskInput.value='';
+        renderTasks();
+      }
+    });
+    taskInput.addEventListener('keydown',(e)=>{ if(e.key==='Enter') addTaskBtn.click(); });
+
+    filterBtns.forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        currentFilter=btn.dataset.filter;
+        filterBtns.forEach(b=>b.classList.remove('filter-selected'));
+        btn.classList.add('filter-selected');
+        trashActions.style.display = (currentFilter === 'trash') ? 'flex' : 'none';
+        renderTasks();
+      });
+    });
+
+    emptyTrashBtn.addEventListener('click',()=>{
+      if(confirm("Voulez-vous vraiment vider la corbeille ? Cette action est irréversible.")){
+        trash = [];
+        saveTasks();
+        renderTasks();
+      }
+    });
+
+    window.addEventListener('DOMContentLoaded',()=>{
+      renderTasks();
+      document.querySelector('[data-filter="all"]').classList.add('filter-selected');
+    });
+  </script>
+
+</body>
+</html>
